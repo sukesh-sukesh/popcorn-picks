@@ -1,2 +1,19 @@
+# PopcornPicks
+
+PopcornPicks is a movie recommendation system built with Flask and machine learning. It suggests movies based on user input by leveraging TF-IDF and cosine similarity.
+
+## Getting Started
+
 To truly enhance your experience with this application, we highly recommend downloading the "movie.csv" dataset from Kaggle. This resource will significantly improve functionality and performance, allowing you to make the most out of the application.
-https://drive.google.com/file/d/1cCkwiVv4mgfl20ntgY3n4yApcWqqZQe6/view?usp=sharing
+
+[Download the dataset from this link](https://drive.google.com/file/d/1cCkwiVv4mgfl20ntgY3n4yApcWqqZQe6/view?usp=sharing)
+
+### Prerequisites
+
+Make sure you have Python installed and the following dependencies:
+
+```bash
+Flask
+pandas
+scikit-learn
+numpy
