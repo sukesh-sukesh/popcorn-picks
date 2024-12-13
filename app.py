@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# Load your dataset
+
 dataset_path = 'dataset/movies.csv'
 movies_data = pd.read_csv(dataset_path, on_bad_lines='skip', engine='python')
 
@@ -40,7 +40,7 @@ def get_movie_recommendations(movie_name):
         close_match = find_close_match[0]
         index_of_the_movie = movies_data[movies_data.title == close_match]['index'].values[0]
         
-        # Get movie details
+   
         movie_details = movies_data[movies_data.index == index_of_the_movie]
         genres = movie_details['genres'].values[0]
         release_date = movie_details['release_date'].values[0][:4]  # Extracting the year only
@@ -48,7 +48,7 @@ def get_movie_recommendations(movie_name):
         cast = movie_details['cast'].values[0]
         vote_average = movie_details['vote_average'].values[0]
 
-        # Get recommendations
+       
         similarity_score = list(enumerate(similarity[index_of_the_movie]))
         sorted_similar_movies = sorted(similarity_score, key=lambda x: x[1], reverse=True)
         
