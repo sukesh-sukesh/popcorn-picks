@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PopcornPicks</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Your existing CSS */
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { width: 80%; margin: 50px auto; text-align: center; }
+        h1 { color: #333; text-transform: uppercase; font-weight: bold; }
+        #movie-search { margin: 20px 0; display: flex; justify-content: center; align-items: center; }
+        input[type="text"] { padding: 10px; width: 60%; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        button { padding: 6px 12px; border: none; background-color: #007BFF; color: white; border-radius: 5px; font-size: 14px; cursor: pointer; margin-left: 10px; }
+        button:hover { background-color: #0056b3; }
+        .results { margin-top: 30px; }
+        .movie-details { font-size: 20px; margin-top: 20px; }
+        .recommendations { list-style: none; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; }
+        .recommendation-item { margin: 10px; padding: 20px; border: 1px solid #ccc; border-radius: 5px; width: 200px; text-align: center; background-color: #fff; transition: transform 0.3s; }
+        .recommendation-item:hover { transform: scale(1.05); background-color: #f0f0f0; }
+        .recommendation-rating { font-size: 14px; color: #999; }
+        .dark-mode { background-color: #121212; color: #f4f4f4; }
+        .dark-mode button { background-color: #444; color: #f4f4f4; }
+        .dark-mode .recommendation-item { background-color: #333; }
+        .search-history { margin-top: 10px; }
+        .search-history-item { display: inline-block; margin: 5px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #eee; cursor: pointer; color: #333; }
+        .search-history-item:hover { background-color: #ddd; }
+        .dark-mode .search-history-item { background-color: #444; color: #f4f4f4; border-color: #777; }
+        .dark-mode .search-history-item:hover { background-color: #555; }
+        .delete-history-item { margin-left: 10px; cursor: pointer; color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>POPCORNPICKS</h1>
+        <div id="movie-search">
+            <input type="text" id="movie-input" placeholder="Enter a movie name" />
+            <button onclick="getRecommendations()">Search</button>
+        </div>
+        <button onclick="toggleDarkMode()">Dark Mode</button>
+        <div class="search-history" id="search-history"></div>
+        <div class="results">
+            <h2 id="movie-title"></h2>
+            <div class="movie-details" id="movie-details"></div>
+            <ul class="recommendations" id="recommendations-list"></ul>
+        </div>
+    </div>
+    <script>
+        let searchHistory = [];
+
+        function updateSearchHistory() {
+            const searchHistoryDiv = document.getElementById('search-history');
+            searchHistoryDiv.innerHTML = '';  // Clear previous search history
+
+            searchHistory.forEach((movie, index) => {
+                const span = document.createElement('span');
+                span.className = 'search-history-item';
+                span.textContent = movie;
+                span.onclick = () => {
+                    document.getElementById('movie-input').value = movie;
+                    getRecommendations();
+                };
+
+                const deleteSpan = document.createElement('span');
+                deleteSpan.className = 'delete-history-item';
+                deleteSpan.textContent = 'x';
+                deleteSpan.onclick = (e) => {
+                    e.stopPropagation();
+                    searchHistory.splice(index, 1);
+                    updateSearchHistory();
+                };
+
+                span.appendChild(deleteSpan);
+                searchHistoryDiv.appendChild(span);
+            });
+        }
+
+        async function getRecommendations() {
+            const input = document.getElementById('movie-input').value;
+
+            // Add to search history if not already present
+            if (input && !searchHistory.includes(input)) {
+                searchHistory.push(input);
+                updateSearchHistory();
+            }
+
+            const response = await fetch('/recommend', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ input }),
+            });
+
+            const data = await response.json();
+            const recommendationsList = document.getElementById('recommendations-list');
+            const movieDetails = document.getElementById('movie-details');
+            const movieTitle = document.getElementById('movie-title');
+
+            recommendationsList.innerHTML = '';  // Clear previous recommendations
+            movieDetails.innerHTML = '';  // Clear previous movie details
+
+            if (data.error) {
+                recommendationsList.innerHTML = `<li>${data.error}</li>`;
+            } else {
+                movieTitle.textContent = `DETAILS FOR ${data.movie.toUpperCase()}`;
+                movieDetails.innerHTML = `
+                    Genre: ${data.genres}<br>
+                    <span>Release Date:</span><br>${data.release_date}<br>
+                    Director: ${data.director}<br>
+                    Cast: ${data.cast}<br>
+                    Rating: ${data.rating}
+                `;
+
+                const relatedText = document.createElement('h3');
+                relatedText.textContent = 'RELATED MOVIES LIKE...';
+                relatedText.style.textTransform = 'uppercase';
+                relatedText.style.fontWeight = 'bold';
+                movieDetails.appendChild(relatedText);
+
+                data.recommendations.forEach(movie => {
+                    const li = document.createElement('li');
+                    li.className = 'recommendation-item';
+                    li.innerHTML = `
+                        ${movie.title}<br>
+                        <span class="recommendation-rating">Rating: ${movie.rating}</span>
+                    `;
+                    recommendationsList.appendChild(li);
+                });
+            }
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
+</body>
+</html>
