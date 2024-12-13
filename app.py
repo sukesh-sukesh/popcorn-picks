@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify, render_template
 app = Flask(__name__)
 
 # Load your dataset
-dataset_path = 'movies.csv' # Changed to directly load movies.csv
+dataset_path = 'dataset/movies.csv'
 movies_data = pd.read_csv(dataset_path, on_bad_lines='skip', engine='python')
 
 selected_features = ['genres', 'keywords', 'tagline', 'cast', 'director']
